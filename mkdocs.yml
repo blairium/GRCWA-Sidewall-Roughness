@@ -1,0 +1,26 @@
+site_name: GRCWA-Sidewall-Roughness
+site_description: Calculates the effect of sidewall roughness on diffraction efficiency for a 2D binary grating unit cell
+site_url: https://blairium.github.io/GRCWA-Sidewall-Roughness
+repo_url: https://github.com/blairium/GRCWA-Sidewall-Roughness
+repo_name: blairium/GRCWA-Sidewall-Roughness
+
+strict: true
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences

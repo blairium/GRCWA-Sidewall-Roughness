@@ -1,0 +1,14 @@
+_commit: v1.6.0
+_src_path: gh:superlinear-ai/substrate
+author_email: b.haydon@latrobe.edu.au
+author_name: Blair Haydon
+project_description: Calculates the effect of sidewall roughness on diffraction efficiency
+    for a 2D binary grating unit cell
+project_name: GRCWA-Sidewall-Roughness
+project_type: app
+project_url: https://github.com/blairium/GRCWA-Sidewall-Roughness
+python_version: '3.12'
+typing: strict
+with_conventional_commits: true
+with_fastapi_api: false
+with_typer_cli: false
