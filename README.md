@@ -2,7 +2,7 @@
 
 # GRCWA-Sidewall-Roughness
 
-Calculates the effect of sidewall roughness on diffraction efficiency for a 2D binary grating unit cell
+Calculates the effect of sidewall roughness on diffraction efficiency for a 2D binary grating unit cell using [GRCWA](https://grcwa.readthedocs.io/en/latest/index.html).
 
 ** Organisation
 

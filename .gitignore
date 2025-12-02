@@ -67,3 +67,7 @@ dist/
 
 # VS Code
 .vscode/
+SRC/grcwa-sidewall-roughness/restest_20000020.00000_20.00000_200.00000_mask.tif
+SRC/grcwa-sidewall-roughness/PSD.py
+SRC/grcwa-sidewall-roughness/resampleArray.py
+SRC/grcwa-sidewall-roughness/LER_script_clean.py
