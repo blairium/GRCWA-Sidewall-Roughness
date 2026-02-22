@@ -13,10 +13,14 @@ validation:
   anchors: warn
 
 theme:
-  name: material
+  name: readthedocs
 
 nav:
   - Home: index.md
+  - Examples: 
+    - Isotropic Gratings : iso_grating.md
+    - Anisotropi Gratings : aniso_grating.md
+  - About: about.md
 
 plugins:
   - search

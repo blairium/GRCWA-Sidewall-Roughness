@@ -1,14 +1,26 @@
 from scipy.ndimage import gaussian_filter
 from scipy.stats import norm
 import numpy as np
+import sympy
+import matplotlib.pyplot as plt
 
 
 def correlation_function():
     return None
 
 
-def sidewall_roughness():
-    return None
+def sidewall_roughness(sigma, r1, r2, taux, tauz):
+    """
+    From Ban 2025
+    """
+
+    return np.square(sigma) * np.exp(
+        -np.abs(r1[0] - np.square(r2[0])) / np.square(taux)
+        + np.abs(r1[1] - np.square(r2[1])) / np.square(tauz)
+    )
+
+
+print(sidewall_roughness(0.4, np.array([10, 10]), np.array([11, 14]), 3, 4))
 
 
 def apply_roughness(epgrid, sidewall_roughness, period, height):
@@ -60,3 +72,27 @@ def apply_roughness(epgrid, sidewall_roughness, period, height):
             rough_epgrid[:new_boundary_x1, y] = vac_sq_val
 
     return rough_epgrid
+
+
+# 1. Define Parameters
+num_points = 1000
+# Generate white noise (Gaussian distribution)
+np.random.seed(42)  # For reproducibility
+roughness = np.random.normal(0, 1, num_points)
+
+# 2. Simulate Roughness
+# Option A: White Noise Profile (very rough)
+profile_white = roughness
+
+# Option B: Cumulative Sum (Brownian Noise / Random Walk - smoother)
+profile_walk = np.cumsum(roughness)
+
+# 3. Plotting
+plt.figure(figsize=(10, 5))
+plt.plot(profile_walk, label="1D Rough Profile (Random Walk)", color="blue")
+plt.title("Simulated 1D Rough Line")
+plt.xlabel("Position")
+plt.ylabel("Elevation/Height")
+plt.grid(True)
+plt.legend()
+plt.show()
