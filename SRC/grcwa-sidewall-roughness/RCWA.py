@@ -2,6 +2,7 @@ import grcwa
 import numpy as np
 from data import get_optical_constants
 from Roughness import apply_roughness
+from plotting import plot_grating_schematic
 
 
 def calculate_first_order_transmission(
@@ -77,55 +78,55 @@ def calculate_first_order_transmission(
     return T_by_order[order_index]
 
 
-# if __name__ == "__main__":
-# heights = np.linspace(5, 250, 100)
-# num_runs = 10
-# roughness = np.arange(1, 6, 1)  # nm
-# results = {}
-# task3 = progress_custom.add_task(
-#     "Playing hard...", total=len(heights) * num_runs * len(roughness)
-# )
-# with progress_custom:
-#     for s in roughness:
-#         first_order_intensities_ideal, first_order_intensities_rough = run(
-#             heights,
-#             s,
-#             num_runs=num_runs,
-#             progress=progress_custom.update(task3, advance=1),
-#         )
-#         results[s] = [first_order_intensities_ideal, first_order_intensities_rough]
+if __name__ == "__main__":
+    # heights = np.linspace(5, 250, 100)
+    # num_runs = 10
+    # roughness = np.arange(1, 6, 1)  # nm
+    # results = {}
+    # task3 = progress_custom.add_task(
+    #     "Playing hard...", total=len(heights) * num_runs * len(roughness)
+    # )
+    # with progress_custom:
+    #     for s in roughness:
+    #         first_order_intensities_ideal, first_order_intensities_rough = run(
+    #             heights,
+    #             s,
+    #             num_runs=num_runs,
+    #             progress=progress_custom.update(task3, advance=1),
+    #         )
+    #         results[s] = [first_order_intensities_ideal, first_order_intensities_rough]
 
-#     # print(
-#     #     f"Height: {height:.2f} nm, Ideal Intensity: {ideal_intensity:.4f}, Rough Intensity: {rough_intensity:.4f}"
-#     # )
+    #     # print(
+    #     #     f"Height: {height:.2f} nm, Ideal Intensity: {ideal_intensity:.4f}, Rough Intensity: {rough_intensity:.4f}"
+    #     # )
 
-# # Plot the results
-# fig, ax = plt.subplots()
-# ax.plot(heights, results[1][0], label="Ideal Grating")
-# for roughness, data in results.items():
-#     ax.scatter(heights, data[1], label=f"{roughness} nm roughness")
-# ax.set_xlabel("Grating Height (nm)")
-# ax.set_ylabel("First-Order Intensity")
-# ax.set_title("First-Order Intensity vs. Grating Height")
-# ax.grid(True)
-# ax.legend()
-# plt.savefig("first_order_intensity.png")
-# print("Plot saved to first_order_intensity.png")
+    # # Plot the results
+    # fig, ax = plt.subplots()
+    # ax.plot(heights, results[1][0], label="Ideal Grating")
+    # for roughness, data in results.items():
+    #     ax.scatter(heights, data[1], label=f"{roughness} nm roughness")
+    # ax.set_xlabel("Grating Height (nm)")
+    # ax.set_ylabel("First-Order Intensity")
+    # ax.set_title("First-Order Intensity vs. Grating Height")
+    # ax.grid(True)
+    # ax.legend()
+    # plt.savefig("first_order_intensity.png")
+    # print("Plot saved to first_order_intensity.png")
 
-# # Generate and plot a schematic of a rough grating for visualization
-# # We will use the parameters from the middle of the height range
-# example_height = 50.0
-# Nx, Ny = 1000, 1000
-# period = 100.0
-# refractive_index_ni = get_optical_constants("Ni", 6.7)
-# refractive_index_vacuum = 1.0
+    # Generate and plot a schematic of a rough grating for visualization
+    # We will use the parameters from the middle of the height range
+    example_height = 50.0
+    Nx, Ny = 1000, 1000
+    period = 100.0
+    refractive_index_ni = get_optical_constants("Ni", 6.7)
+    refractive_index_vacuum = 1.0
 
-# # Create the ideal grating grid
-# epgrid_ideal = np.ones((Nx, Ny), dtype=complex) * refractive_index_vacuum**2
-# epgrid_ideal[Nx // 4 : 3 * Nx // 4, :] = refractive_index_ni**2
+    # Create the ideal grating grid
+    epgrid_ideal = np.ones((Nx, Ny), dtype=complex) * refractive_index_vacuum**2
+    epgrid_ideal[Nx // 4 : 3 * Nx // 4, :] = refractive_index_ni**2
 
-# # Apply roughness
-# epgrid_rough = apply_roughness(epgrid_ideal, s, period, example_height)
+    # Apply roughness
+    epgrid_rough = apply_roughness(epgrid_ideal, 3, period, example_height)
 
-# # Plot the schematic
-# plot_grating_schematic(epgrid_rough, period, filename=r"grating_schematic.png")
+    # Plot the schematic
+    plot_grating_schematic(epgrid_rough, period, filename=r"grating_schematic.png")

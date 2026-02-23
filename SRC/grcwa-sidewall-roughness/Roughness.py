@@ -1,7 +1,7 @@
 from scipy.ndimage import gaussian_filter
 from scipy.stats import norm
 import numpy as np
-import sympy
+import scipy.signal
 import matplotlib.pyplot as plt
 
 
@@ -10,7 +10,7 @@ def correlation_function():
 
 
 def sidewall_roughness(sigma, r1, r2, taux, tauz):
-    """
+    """python
     From Ban 2025
     """
 
@@ -21,7 +21,16 @@ def sidewall_roughness(sigma, r1, r2, taux, tauz):
 
 
 # print(sidewall_roughness(0.4, np.array([10, 10]), np.array([11, 14]), 3, 4))
+def fast_generate(correlation_length,):
+    #https://stackoverflow.com/questions/63816481/faster-method-for-creating-spatially-correlated-noise?rq=3
+    x = np.arange(-correlation_length, correlation_length)
+    dist = np.sqrt(x**2)
+    filter_kernel = np.exp(-dist**2/(2*correlation_length))
 
+    # Generate n-by-n grid of spatially correlated noise
+    n = 50
+    noise = np.random.randn(n)
+    return scipy.signal.fftconvolve(noise, filter_kernel, mode='same')
 
 def generate_correlated_noise(n_points, rms, correlation_length, pixel_size):
     """
@@ -38,17 +47,27 @@ def generate_correlated_noise(n_points, rms, correlation_length, pixel_size):
     """
     if correlation_length <= 0 or pixel_size <= 0:
         return np.random.normal(0, rms, n_points)
+    rng = np.random.default_rng()
+    x = np.arange(-correlation_length, correlation_length)
+    dist = np.sqrt(x**2)
+    filter_kernel = np.exp(-dist**2/(2*correlation_length))
 
-    sigma_pixels = correlation_length / pixel_size
-    noise = np.random.randn(n_points)
-    smooth_noise = gaussian_filter(noise, sigma=sigma_pixels)
+    noise = rng.standard_normal(n_points)
+
+    noise =  scipy.signal.fftconvolve(noise, filter_kernel, mode='same')
+
+
+
+    # sigma_pixels = correlation_length / pixel_size
+    # noise = np.random.randn(n_points)
+    # smooth_noise = gaussian_filter(noise, sigma=sigma_pixels)
 
     # Rescale to match desired RMS
-    current_std = np.std(smooth_noise)
+    current_std = np.std(noise)
     if current_std == 0:
         return np.zeros(n_points)
 
-    displacement = smooth_noise * (rms / current_std)
+    displacement = noise * (rms / current_std) 
     return displacement
 
 
@@ -110,7 +129,35 @@ def apply_roughness(epgrid, sidewall_roughness, period, height, surface_roughnes
 
     return rough_epgrid
 
+def ban(rms,x1,x2,y1,y2,corr_x,corr_y):
+    return rms**2 * np.exp(-((np.abs(x1-x2)**2)/(corr_x**2))+((np.abs(y1-y2)**2)/corr_y**2))
 
+
+def autocorrelation(rms,z_dist,corr_len,roughness_index):
+    '''
+    #1 in https://opg.optica.org/oe/fulltext.cfm?uri=oe-30-22-40413
+    '''
+    return rms**2 * np.exp(-(z_dist/corr_len)**(2*roughness_index))
+
+def PSD(rms,corr_len,grating_thickness,j):
+    '''
+    #2 in https://opg.optica.org/oe/fulltext.cfm?uri=oe-30-22-40413
+    '''
+    return np.sqrt(np.pi)*rms**2 * corr_len * np.exp(-(np.pi*(j/grating_thickness)*corr_len)**2)
+
+
+def wu_sidewall_roughness_model(H,N,fj):
+    '''
+    https://opg.optica.org/oe/fulltext.cfm?uri=oe-30-22-40413
+    '''
+
+
+
+
+
+
+if __name__ == "__main__":
+    fast_generate()
 # 1. Define Parameters
 # num_points = 1000
 # # Generate white noise (Gaussian distribution)

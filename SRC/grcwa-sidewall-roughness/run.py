@@ -70,7 +70,7 @@ if __name__ == "__main__":
     df = run(
         np.arange(5, 50, 10),
         2,
-        num_runs=32,
+        num_runs=2,
     )
     print(df)
     print("--- %s seconds ---" % (time.time() - start_time))
