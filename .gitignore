@@ -74,3 +74,4 @@ SRC/grcwa-sidewall-roughness/LER_script_clean.py
 grating_schematic.png
 pyproject.toml
 uv.lock
+*.png

@@ -71,7 +71,7 @@ def generate_correlated_noise(n_points, rms, correlation_length, pixel_size):
     return displacement
 
 
-def apply_roughness(epgrid, sidewall_roughness, period, height, surface_roughness=0.0, correlation_length=2.0):
+def apply_roughness(epgrid, sidewall_roughness, period, height, surface_roughness=0.0, correlation_length=100.0):
     """
     Applies surface and sidewall roughness to the grating structure using correlated noise.
 

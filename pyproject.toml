@@ -8,9 +8,12 @@ authors = [
 ]
 requires-python = ">=3.12,<4.0"
 dependencies = [
+  "colormaps>=0.4.2",
   "grcwa>=0.1.2",
   "matplotlib>=3.10.7",
+  "numpy>=2.2.6",
   "opencv-python>=4.12.0.88",
+  "periodictable>=2.0.2",
   "poethepoet (>=0.32.1)",
   "polars>=1.35.2",
   "rich>=14.2.0",
