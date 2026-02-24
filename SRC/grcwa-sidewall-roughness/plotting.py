@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 import polars as pl
 from colormaps.cmaps import Cmaps
-
+plt.style.use('thesis')
 
 def plot_grating_schematic(epgrid, period, filename="grating_schematic.png"):
     """
@@ -69,6 +69,7 @@ def plot_roughness_effect():
     ax.set_ylabel('Diffraction Efficiency')
     ax.set_xlabel('Grating Height')
     ax.legend(title='Roughness')
+    plt.savefig('de-roughness-plot-185eV-Ni-100nm-HP.png',dpi=500)
     plt.show()
 
 
