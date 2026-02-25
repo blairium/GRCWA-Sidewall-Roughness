@@ -1,36 +1,44 @@
 import grcwa
 import numpy as np
 from data import get_optical_constants
-from Roughness import apply_roughness
 from plotting import plot_grating_schematic
+from Roughness import apply_roughness
 
 
 def calculate_first_order_transmission(
-    height,
-    mat="Ni",
-    wavelength=6.7,
-    period=100.0,
-    sidewall_roughness=0.0,
-    nG=51,
-    theta=0.0,
-    phi=0.0,
-    Nx=1000,
-    Ny=1000,
-):
+    height: float,
+    mat: str = "Ni",
+    wavelength: float = 6.7,
+    period: float = 100.0,
+    sidewall_roughness: float = 0.0,
+    nG: int = 51,
+    theta: float = 0.0,
+    phi: float = 0.0,
+    Nx: int = 1000,
+    Ny: int = 1000,
+) -> float:
     """
-    Calculates the first-order transmitted diffraction intensity for a nickel binary grating.
+    Calculates the first-order transmitted diffraction intensity for a binary grating.
 
     Args:
         height (float): The height of the grating in nm.
+        mat (str, optional): Material name for optical constants. Defaults to "Ni".
+        wavelength (float, optional): Wavelength in nm. Defaults to 6.7.
+        period (float, optional): Grating period in nm. Defaults to 100.0.
+        sidewall_roughness (float, optional): RMS roughness of the sidewall in nm. Defaults to 0.0.
+        nG (int, optional): Number of Fourier harmonics. Defaults to 51.
+        theta (float, optional): Incident angle theta. Defaults to 0.0.
+        phi (float, optional): Incident angle phi. Defaults to 0.0.
+        Nx (int, optional): Grid size in x. Defaults to 1000.
+        Ny (int, optional): Grid size in y. Defaults to 1000.
 
-    Returns:
+    Returns
+    -------
         float: The first-order transmitted intensity.
     """
     grcwa.set_backend("numpy")
-    # Grating parameters
-    wavelength = 6.7  # nm
-    period = 100.0  # nm
-    # Refractive index for nickel at 6.7 nm.
+
+    # Refractive index for material at specified wavelength.
     refractive_index_ni = get_optical_constants(mat, wavelength)
     refractive_index_vacuum = 1.0
 
@@ -75,44 +83,10 @@ def calculate_first_order_transmission(
     # Find the index for the (1,0) order
     order_index = np.where(np.all(orders == [1, 0], axis=1))[0][0]
 
-    return T_by_order[order_index]
+    return float(T_by_order[order_index])
 
 
 if __name__ == "__main__":
-    # heights = np.linspace(5, 250, 100)
-    # num_runs = 10
-    # roughness = np.arange(1, 6, 1)  # nm
-    # results = {}
-    # task3 = progress_custom.add_task(
-    #     "Playing hard...", total=len(heights) * num_runs * len(roughness)
-    # )
-    # with progress_custom:
-    #     for s in roughness:
-    #         first_order_intensities_ideal, first_order_intensities_rough = run(
-    #             heights,
-    #             s,
-    #             num_runs=num_runs,
-    #             progress=progress_custom.update(task3, advance=1),
-    #         )
-    #         results[s] = [first_order_intensities_ideal, first_order_intensities_rough]
-
-    #     # print(
-    #     #     f"Height: {height:.2f} nm, Ideal Intensity: {ideal_intensity:.4f}, Rough Intensity: {rough_intensity:.4f}"
-    #     # )
-
-    # # Plot the results
-    # fig, ax = plt.subplots()
-    # ax.plot(heights, results[1][0], label="Ideal Grating")
-    # for roughness, data in results.items():
-    #     ax.scatter(heights, data[1], label=f"{roughness} nm roughness")
-    # ax.set_xlabel("Grating Height (nm)")
-    # ax.set_ylabel("First-Order Intensity")
-    # ax.set_title("First-Order Intensity vs. Grating Height")
-    # ax.grid(True)
-    # ax.legend()
-    # plt.savefig("first_order_intensity.png")
-    # print("Plot saved to first_order_intensity.png")
-
     # Generate and plot a schematic of a rough grating for visualization
     # We will use the parameters from the middle of the height range
     example_height = 50.0
@@ -129,4 +103,4 @@ if __name__ == "__main__":
     epgrid_rough = apply_roughness(epgrid_ideal, 3, period, example_height)
 
     # Plot the schematic
-    plot_grating_schematic(epgrid_rough, period, filename=r"grating_schematic-3nm-ler.png")
+    plot_grating_schematic(epgrid_rough, period, filename=r"grating_schematic.png")
