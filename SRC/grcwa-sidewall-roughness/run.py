@@ -6,6 +6,7 @@ from typing import NamedTuple
 
 import numpy as np
 import polars as pl
+from RCWA import calculate_first_order_transmission
 from rich.progress import (
     BarColumn,
     Progress,
@@ -14,8 +15,6 @@ from rich.progress import (
     TextColumn,
     TimeRemainingColumn,
 )
-
-from RCWA import calculate_first_order_transmission
 
 # Define the root directory
 dirpath: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent.parent
@@ -37,7 +36,8 @@ def simulation_task(params: SimulationParams) -> tuple[float, float, float, floa
     Args:
         params (SimulationParams): The parameters for the simulation.
 
-    Returns:
+    Returns
+    -------
         tuple: (height, roughness, wavelength, period, intensity)
     """
     intensity = calculate_first_order_transmission(
@@ -74,7 +74,8 @@ def run_simulations(
         periods (np.ndarray): Array of grating periods (nm).
         num_processes (int, optional): Number of parallel processes to use. Defaults to 4.
 
-    Returns:
+    Returns
+    -------
         pl.DataFrame: DataFrame containing the results with columns:
                       'height', 'roughness', 'wavelength', 'period', 'intensity'.
     """
