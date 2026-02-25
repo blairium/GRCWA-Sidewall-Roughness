@@ -1,11 +1,12 @@
-import numpy as np
+import statistics
+
 import cv2  # (OpenCV3)
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import ticker
 from scipy import signal
 from scipy.interpolate import interp1d
 from sklearn import linear_model
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import statistics
 
 
 class edge_roughness:
@@ -121,9 +122,7 @@ class edge_roughness:
 
             if arr[mid] < x:
                 lo = mid + 1
-            elif arr[mid] > x:
-                hi = mid
-            elif mid > 0 and arr[mid - 1] == x:
+            elif arr[mid] > x or (mid > 0 and arr[mid - 1] == x):
                 hi = mid
             else:
                 return mid
