@@ -129,4 +129,4 @@ if __name__ == "__main__":
     epgrid_rough = apply_roughness(epgrid_ideal, 3, period, example_height)
 
     # Plot the schematic
-    plot_grating_schematic(epgrid_rough, period, filename=r"grating_schematic.png")
+    plot_grating_schematic(epgrid_rough, period, filename=r"grating_schematic-3nm-ler.png")

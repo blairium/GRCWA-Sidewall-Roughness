@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 from pathlib import Path
 import polars as pl
@@ -65,10 +66,16 @@ def plot_roughness_effect():
         if i % 2 == 1:
             pass
         else:
-            ax.errorbar(df['grating_height'],df_mean[col],yerr=df_stdev[col] ,label=col,marker='o',linestyle='none',mfc='none',mec=colours(i+1),capsize=3)
+            ax.errorbar(df['grating_height'],df_mean[col],yerr=df_stdev[col] ,label=col[:-4],marker='o',linestyle='none',mfc='none',mec=colours(i+1),color=colours(i+1),capsize=3)
     ax.set_ylabel('Diffraction Efficiency')
     ax.set_xlabel('Grating Height')
-    ax.legend(title='Roughness')
+    bounds = np.arange(2,11,1)
+    norm = mpl.colors.BoundaryNorm(bounds, colours.N)
+
+    fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=colours),
+             ax=ax, orientation='vertical', label='RMS Roughness [nm]')
+    ax.legend(title='RMS LER',fontsize=8)
+    plt.title(r'LER DE - $h\nu = 185 eV$ - 100 nm half-pitch Ni grating')
     plt.savefig('de-roughness-plot-185eV-Ni-100nm-HP.png',dpi=500)
     plt.show()
 
