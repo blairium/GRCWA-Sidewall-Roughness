@@ -3,6 +3,7 @@ import multiprocessing
 import pathlib
 import time
 from typing import NamedTuple
+from datetime import datetime
 
 import numpy as np
 import polars as pl
@@ -15,6 +16,7 @@ from rich.progress import (
     TextColumn,
     TimeRemainingColumn,
 )
+from rich.pretty import pprint
 
 # Define the root directory
 dirpath: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent.parent
@@ -48,13 +50,7 @@ def simulation_task(params: SimulationParams) -> tuple[float, float, float, floa
         # Default values for other parameters are used here.
         # If needed, these could be added to SimulationParams.
     )
-    return (
-        params.height,
-        params.roughness,
-        params.wavelength,
-        params.period,
-        intensity,
-    )
+    return (params.height, params.roughness, params.wavelength, params.period, intensity)
 
 
 def run_simulations(
@@ -100,14 +96,12 @@ def run_simulations(
     ]
 
     total_sims = len(combinations)
-    print(f"Starting {total_sims} simulations...")
+    pprint(f"Starting {total_sims} simulations...")
 
     results: list[tuple[float, float, float, float, float]] = []
 
     with progress:
-        task_id = progress.add_task(
-            "[green]Processing Simulations...", total=total_sims
-        )
+        task_id = progress.add_task("[green]Processing Simulations...", total=total_sims)
 
         # Use multiprocessing Pool
         with multiprocessing.Pool(processes=num_processes) as pool:
@@ -119,9 +113,7 @@ def run_simulations(
 
     # Create DataFrame
     df = pl.DataFrame(
-        results,
-        schema=["height", "roughness", "wavelength", "period", "intensity"],
-        orient="row",
+        results, schema=["height", "roughness", "wavelength", "period", "intensity"], orient="row"
     )
 
     return df
@@ -129,33 +121,34 @@ def run_simulations(
 
 if __name__ == "__main__":
     start_time = time.time()
+    today = datetime.today().strftime("%Y-%m-%d")
 
     # Define parameter ranges for the simulation
-    # Reduced ranges for demonstration/testing purposes
-    heights = np.arange(50, 60, 5)  # 2 values
-    roughness_values = np.linspace(0, 2, 3)  # 3 values
-    wavelengths = np.linspace(6.0, 7.0, 3)  # 3 values
-    periods = np.linspace(90, 110, 3)  # 3 values
+    heights = np.arange(5, 100, 2.5)
+    roughness_values = np.arange(0, 11, 2)
+    wavelengths = np.array([4.23, 6.7, 13.5])
+    periods = np.arange(40, 120, 20)
 
-    print("Running simulations with:")
-    print(f"Heights: {heights}")
-    print(f"Roughness: {roughness_values}")
-    print(f"Wavelengths: {wavelengths}")
-    print(f"Periods: {periods}")
+    pprint(f"{multiprocessing.cpu_count()} processors available")
+    pprint("Running simulations with:")
+    pprint(f"Heights: {heights}")
+    pprint(f"Roughness: {roughness_values}")
+    pprint(f"Wavelengths: {wavelengths}")
+    pprint(f"Periods: {periods}")
 
     df = run_simulations(
         heights=heights,
         roughness_values=roughness_values,
         wavelengths=wavelengths,
         periods=periods,
-        num_processes=multiprocessing.cpu_count(),
+        num_processes=4,  # multiprocessing.cpu_count(),
     )
 
     # Ensure data directory exists
     data_dir = dirpath / "data"
     data_dir.mkdir(exist_ok=True)
 
-    output_path = data_dir / "simulation_results.csv"
+    output_path = data_dir / f"{today}_simulation_results.csv"
     df.write_csv(output_path)
-    print(f"Results saved to {output_path}")
-    print(f"Total execution time: {time.time() - start_time:.2f} seconds")
+    pprint(f"Results saved to {output_path}")
+    pprint(f"Total execution time: {time.time() - start_time:.2f} seconds")
