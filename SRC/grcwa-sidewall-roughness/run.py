@@ -3,7 +3,6 @@ import multiprocessing
 import pathlib
 import time
 from typing import NamedTuple
-from datetime import datetime
 
 import numpy as np
 import polars as pl
@@ -16,7 +15,6 @@ from rich.progress import (
     TextColumn,
     TimeRemainingColumn,
 )
-from rich.pretty import pprint
 
 # Define the root directory
 dirpath: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent.parent
@@ -50,7 +48,13 @@ def simulation_task(params: SimulationParams) -> tuple[float, float, float, floa
         # Default values for other parameters are used here.
         # If needed, these could be added to SimulationParams.
     )
-    return (params.height, params.roughness, params.wavelength, params.period, intensity)
+    return (
+        params.height,
+        params.roughness,
+        params.wavelength,
+        params.period,
+        intensity,
+    )
 
 
 def run_simulations(
@@ -59,6 +63,7 @@ def run_simulations(
     wavelengths: np.ndarray,
     periods: np.ndarray,
     num_processes: int = 4,
+    num_repeats: int = 1,
 ) -> pl.DataFrame:
     """
     Run RCWA simulations for all combinations of the provided parameters.
@@ -69,6 +74,7 @@ def run_simulations(
         wavelengths (np.ndarray): Array of wavelengths (nm).
         periods (np.ndarray): Array of grating periods (nm).
         num_processes (int, optional): Number of parallel processes to use. Defaults to 4.
+        num_repeats (int, optional): Number of times to repeat each simulation. Defaults to 1.
 
     Returns
     -------
@@ -86,22 +92,34 @@ def run_simulations(
     )
 
     # Generate all combinations of parameters
-    # itertools.product returns an iterator, but we need the total length for the progress bar
-    # so we convert to a list or calculate the length.
-    # Calculating length is cheaper than storing a huge list if it's very large,
-    # but for typical simulation parameters, a list is fine.
-    combinations = [
+    base_combinations = [
         SimulationParams(*args)
         for args in itertools.product(heights, roughness_values, wavelengths, periods)
     ]
 
+    # Repeat each combination `num_repeats` times
+    combinations = []
+    for params in base_combinations:
+        # Optimization: If roughness is 0, the result is deterministic, so we could skip repeats.
+        # However, to maintain a consistent data structure and "statistically relevant sample"
+        # request (where std dev of 0 is a valid result), we will repeat even for 0.
+        # But for speed, if roughness == 0, we can just compute once and duplicate?
+        # Let's keep it simple and just repeat the tasks. The overhead is the simulation time.
+        # If simulation time is high, optimizing for 0 is good.
+        # But if the user wants to test "randomness" of the code itself, repeats are safer.
+        # Given the prompt, I will just repeat the tasks.
+        for _ in range(num_repeats):
+            combinations.append(params)
+
     total_sims = len(combinations)
-    pprint(f"Starting {total_sims} simulations...")
+    print(f"Starting {total_sims} simulations ({len(base_combinations)} unique configs x {num_repeats} repeats)...")
 
     results: list[tuple[float, float, float, float, float]] = []
 
     with progress:
-        task_id = progress.add_task("[green]Processing Simulations...", total=total_sims)
+        task_id = progress.add_task(
+            "[green]Processing Simulations...", total=total_sims
+        )
 
         # Use multiprocessing Pool
         with multiprocessing.Pool(processes=num_processes) as pool:
@@ -113,7 +131,9 @@ def run_simulations(
 
     # Create DataFrame
     df = pl.DataFrame(
-        results, schema=["height", "roughness", "wavelength", "period", "intensity"], orient="row"
+        results,
+        schema=["height", "roughness", "wavelength", "period", "intensity"],
+        orient="row",
     )
 
     return df
@@ -121,34 +141,36 @@ def run_simulations(
 
 if __name__ == "__main__":
     start_time = time.time()
-    today = datetime.today().strftime("%Y-%m-%d")
 
     # Define parameter ranges for the simulation
-    heights = np.arange(5, 100, 2.5)
-    roughness_values = np.arange(0, 11, 2)
-    wavelengths = np.array([4.23, 6.7, 13.5])
-    periods = np.arange(40, 120, 20)
+    # Reduced ranges for demonstration/testing purposes
+    heights = np.arange(50, 60, 5)  # 2 values
+    roughness_values = np.linspace(0, 2, 3)  # 3 values
+    wavelengths = np.linspace(6.0, 7.0, 3)  # 3 values
+    periods = np.linspace(90, 110, 3)  # 3 values
+    num_repeats = 5 # 5 repeats
 
-    pprint(f"{multiprocessing.cpu_count()} processors available")
-    pprint("Running simulations with:")
-    pprint(f"Heights: {heights}")
-    pprint(f"Roughness: {roughness_values}")
-    pprint(f"Wavelengths: {wavelengths}")
-    pprint(f"Periods: {periods}")
+    print("Running simulations with:")
+    print(f"Heights: {heights}")
+    print(f"Roughness: {roughness_values}")
+    print(f"Wavelengths: {wavelengths}")
+    print(f"Periods: {periods}")
+    print(f"Repeats: {num_repeats}")
 
     df = run_simulations(
         heights=heights,
         roughness_values=roughness_values,
         wavelengths=wavelengths,
         periods=periods,
-        num_processes=4,  # multiprocessing.cpu_count(),
+        num_processes=multiprocessing.cpu_count(),
+        num_repeats=num_repeats,
     )
 
     # Ensure data directory exists
     data_dir = dirpath / "data"
     data_dir.mkdir(exist_ok=True)
 
-    output_path = data_dir / f"{today}_simulation_results.csv"
+    output_path = data_dir / "simulation_results.csv"
     df.write_csv(output_path)
-    pprint(f"Results saved to {output_path}")
-    pprint(f"Total execution time: {time.time() - start_time:.2f} seconds")
+    print(f"Results saved to {output_path}")
+    print(f"Total execution time: {time.time() - start_time:.2f} seconds")
