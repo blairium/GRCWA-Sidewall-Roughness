@@ -23,6 +23,9 @@ dependencies = [
   "tifffile>=2025.10.16",
 ]
 
+[tool.uv]
+link-mode = "symlink"
+
 [project.urls]  # https://packaging.python.org/en/latest/specifications/well-known-project-urls/#well-known-labels
 homepage = "https://github.com/blairium/GRCWA-Sidewall-Roughness"
 source = "https://github.com/blairium/GRCWA-Sidewall-Roughness"
