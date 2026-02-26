@@ -3,7 +3,7 @@ import multiprocessing
 import pathlib
 import time
 from typing import NamedTuple
-
+from datetime import datetime
 import numpy as np
 import polars as pl
 from RCWA import calculate_first_order_transmission
@@ -48,13 +48,7 @@ def simulation_task(params: SimulationParams) -> tuple[float, float, float, floa
         # Default values for other parameters are used here.
         # If needed, these could be added to SimulationParams.
     )
-    return (
-        params.height,
-        params.roughness,
-        params.wavelength,
-        params.period,
-        intensity,
-    )
+    return (params.height, params.roughness, params.wavelength, params.period, intensity)
 
 
 def run_simulations(
@@ -112,14 +106,14 @@ def run_simulations(
             combinations.append(params)
 
     total_sims = len(combinations)
-    print(f"Starting {total_sims} simulations ({len(base_combinations)} unique configs x {num_repeats} repeats)...")
+    print(
+        f"Starting {total_sims} simulations ({len(base_combinations)} unique configs x {num_repeats} repeats)..."
+    )
 
     results: list[tuple[float, float, float, float, float]] = []
 
     with progress:
-        task_id = progress.add_task(
-            "[green]Processing Simulations...", total=total_sims
-        )
+        task_id = progress.add_task("[green]Processing Simulations...", total=total_sims)
 
         # Use multiprocessing Pool
         with multiprocessing.Pool(processes=num_processes) as pool:
@@ -131,9 +125,7 @@ def run_simulations(
 
     # Create DataFrame
     df = pl.DataFrame(
-        results,
-        schema=["height", "roughness", "wavelength", "period", "intensity"],
-        orient="row",
+        results, schema=["height", "roughness", "wavelength", "period", "intensity"], orient="row"
     )
 
     return df
@@ -141,14 +133,22 @@ def run_simulations(
 
 if __name__ == "__main__":
     start_time = time.time()
-
+    test = False
+    today = datetime.today().strftime("%Y-%m-%d")
     # Define parameter ranges for the simulation
-    # Reduced ranges for demonstration/testing purposes
-    heights = np.arange(50, 60, 5)  # 2 values
-    roughness_values = np.linspace(0, 2, 3)  # 3 values
-    wavelengths = np.linspace(6.0, 7.0, 3)  # 3 values
-    periods = np.linspace(90, 110, 3)  # 3 values
-    num_repeats = 5 # 5 repeats
+    if test:
+        print("Running test")
+        heights = np.arange(50, 60, 5)
+        roughness_values = np.arange(0, 10, 5)
+        wavelengths = np.array([4.23, 6.7, 13.5])
+        periods = np.arange(40, 120, 40)
+        num_repeats = 3  # 5 repeats
+    else:
+        heights = np.arange(5, 150, 2.5)
+        roughness_values = np.arange(0, 10, 2)
+        wavelengths = np.array([4.23, 6.7, 13.5])
+        periods = np.arange(40, 120, 20)
+        num_repeats = 10  # 5 repeats
 
     print("Running simulations with:")
     print(f"Heights: {heights}")
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     data_dir = dirpath / "data"
     data_dir.mkdir(exist_ok=True)
 
-    output_path = data_dir / "simulation_results.csv"
+    output_path = data_dir / f"{today}-simulation_results.csv"
     df.write_csv(output_path)
     print(f"Results saved to {output_path}")
     print(f"Total execution time: {time.time() - start_time:.2f} seconds")

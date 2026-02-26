@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 
+plt.style.use("thesis")
+
 
 def plot_grating_schematic(
     epgrid: np.ndarray, period: float, filename: str = "grating_schematic.png"
@@ -18,9 +20,7 @@ def plot_grating_schematic(
     """
     plt.figure(figsize=(8, 8))
     # We plot the real part of the permittivity grid.
-    plt.imshow(
-        np.real(epgrid.T), origin="lower", cmap="viridis", extent=[0, period, 0, period]
-    )
+    plt.imshow(np.real(epgrid.T), origin="lower", cmap="viridis", extent=[0, period, 0, period])
     plt.colorbar(label="Real part of Permittivity")
     plt.xlabel("x (nm)")
     plt.ylabel("y (nm)")
@@ -89,6 +89,9 @@ def plot_simulation_results(csv_path: str | Path) -> None:
     plt.ylabel("Mean Intensity")
     plt.title(f"Diffraction Efficiency vs Height\n(Wavelength={w} nm, Period={p} nm)")
     plt.legend()
-    plt.grid(True)
     plt.tight_layout()
     plt.show()
+
+
+if __name__ == "__main__":
+    plot_simulation_results("./data/simulation_results.csv")
