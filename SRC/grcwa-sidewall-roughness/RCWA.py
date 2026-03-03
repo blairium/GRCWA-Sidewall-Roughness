@@ -16,6 +16,7 @@ def calculate_first_order_transmission(
     phi: float = 0.0,
     Nx: int = 1000,
     Ny: int = 1000,
+    correlation_length: float = 100.0,
 ) -> float:
     """
     Calculates the first-order transmitted diffraction intensity for a binary grating.
@@ -61,18 +62,14 @@ def calculate_first_order_transmission(
     epgrid[Nx // 4 : 3 * Nx // 4, :] = refractive_index_ni**2
 
     # Apply roughness
-    epgrid = apply_roughness(epgrid, sidewall_roughness, period, height)
+    epgrid = apply_roughness(epgrid, sidewall_roughness, period, height, 0, correlation_length)
 
     obj.GridLayer_geteps(epgrid.flatten())
 
     # Excitation
     planewave = {"p_amp": 0, "s_amp": 1, "p_phase": 0, "s_phase": 0}
     obj.MakeExcitationPlanewave(
-        planewave["p_amp"],
-        planewave["p_phase"],
-        planewave["s_amp"],
-        planewave["s_phase"],
-        order=0,
+        planewave["p_amp"], planewave["p_phase"], planewave["s_amp"], planewave["s_phase"], order=0
     )
 
     # Solve for transmission

@@ -45,6 +45,7 @@ def simulation_task(params: SimulationParams) -> tuple[float, float, float, floa
         sidewall_roughness=params.roughness,
         wavelength=params.wavelength,
         period=params.period,
+        correlation_length=250,
         # Default values for other parameters are used here.
         # If needed, these could be added to SimulationParams.
     )
@@ -120,10 +121,12 @@ def run_simulations(
             # imap allows us to process results as they complete and update the progress bar
             # chunksize can be tuned for performance
             for result in pool.imap(simulation_task, combinations, chunksize=10):
+                # print(result)
                 results.append(result)
                 progress.advance(task_id)
 
     # Create DataFrame
+    print(np.shape(results))
     df = pl.DataFrame(
         results, schema=["height", "roughness", "wavelength", "period", "intensity"], orient="row"
     )
@@ -145,7 +148,7 @@ if __name__ == "__main__":
         num_repeats = 3  # 5 repeats
     else:
         heights = np.arange(5, 150, 2.5)
-        roughness_values = np.arange(0, 10, 2)
+        roughness_values = np.arange(0, 13, 2)
         wavelengths = np.array([4.23, 6.7, 13.5])
         periods = np.arange(40, 120, 20)
         num_repeats = 10  # 5 repeats
@@ -170,7 +173,7 @@ if __name__ == "__main__":
     data_dir = dirpath / "data"
     data_dir.mkdir(exist_ok=True)
 
-    output_path = data_dir / f"{today}-simulation_results.csv"
+    output_path = data_dir / f"{today}-simulation_results_250nm_corr_len.csv"
     df.write_csv(output_path)
     print(f"Results saved to {output_path}")
     print(f"Total execution time: {time.time() - start_time:.2f} seconds")
